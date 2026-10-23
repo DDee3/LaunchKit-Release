@@ -190,6 +190,12 @@ export async function POST(req: Request) {
               { status: 500 }
             );
           }
+        } else {
+          console.error("❌ Webhook Error: Missing userId and customerId in subscription event");
+          return NextResponse.json(
+            { error: "Missing userId and customerId in subscription event" },
+            { status: 500 }
+          );
         }
 
         revalidatePath("/dashboard");
@@ -199,16 +205,23 @@ export async function POST(req: Request) {
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
+        const userId = subscription.metadata?.userId;
 
-        const { data, error } = await supabaseAdmin
-          .from("profiles")
-          .update({
-            subscription_status: "canceled",
-            stripe_subscription_id: null,
-            stripe_price_id: null,
-          })
-          .eq("stripe_customer_id", customerId)
-          .select();
+        const cancelUpdateData = {
+          subscription_status: "canceled",
+          stripe_subscription_id: null,
+          stripe_price_id: null,
+        };
+
+        const query = userId
+          ? supabaseAdmin.from("profiles").update(cancelUpdateData).eq("id", userId).select()
+          : supabaseAdmin
+              .from("profiles")
+              .update(cancelUpdateData)
+              .eq("stripe_customer_id", customerId)
+              .select();
+
+        const { data, error } = await query;
 
         if (error) {
           console.error("Failed to cancel subscription in database:", error.message);
@@ -237,28 +250,65 @@ export async function POST(req: Request) {
 
         if (subscriptionId) {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const userId = subscription.metadata?.userId;
+          const priceId = subscription.items.data[0]?.price.id;
 
-          const { data, error } = await supabaseAdmin
-            .from("profiles")
-            .update({
-              subscription_status: subscription.status,
-              subscription_period_end: getPeriodEndTimestamp(subscription),
-            })
-            .eq("stripe_customer_id", customerId)
-            .select();
+          const invoiceUpdateData = {
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscription.id,
+            stripe_price_id: priceId,
+            subscription_status: subscription.status,
+            subscription_period_end: getPeriodEndTimestamp(subscription),
+          };
 
-          if (error) {
-            console.error("Failed to sync invoice payment success:", error.message);
+          if (userId) {
+            const { data, error } = await supabaseAdmin
+              .from("profiles")
+              .update(invoiceUpdateData)
+              .eq("id", userId)
+              .select();
+
+            if (error) {
+              console.error("Failed to sync invoice payment success by userId:", error.message);
+              return NextResponse.json(
+                { error: "Failed to sync invoice payment state" },
+                { status: 500 }
+              );
+            }
+
+            if (!data || data.length === 0) {
+              console.error("⚠️ Webhook failed to update user by userId. No rows matched.");
+              return NextResponse.json(
+                { error: "Profile not found for userId. Retry later." },
+                { status: 500 }
+              );
+            }
+          } else if (customerId) {
+            const { data, error } = await supabaseAdmin
+              .from("profiles")
+              .update(invoiceUpdateData)
+              .eq("stripe_customer_id", customerId)
+              .select();
+
+            if (error) {
+              console.error("Failed to sync invoice payment success by customerId:", error.message);
+              return NextResponse.json(
+                { error: "Failed to sync invoice payment state" },
+                { status: 500 }
+              );
+            }
+
+            if (!data || data.length === 0) {
+              console.error("⚠️ Webhook failed to update user by customerId. No rows matched.");
+              return NextResponse.json(
+                { error: "Profile not found for customerId. Retry later." },
+                { status: 500 }
+              );
+            }
+          } else {
+            console.error("❌ Webhook Error: Missing userId and customerId in invoice event");
             return NextResponse.json(
-              { error: "Failed to sync invoice payment state" },
-              { status: 500 }
-            );
-          }
-
-          if (!data || data.length === 0) {
-            console.error("⚠️ Webhook failed to update user. No rows matched.");
-            return NextResponse.json(
-              { error: "Profile not found for customerId. Retry later." },
+              { error: "Missing userId and customerId in invoice event" },
               { status: 500 }
             );
           }
