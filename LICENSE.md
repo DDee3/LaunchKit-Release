@@ -1,6 +1,6 @@
 # LaunchKit Commercial License
 
-Copyright (c) 2026 [Your Name/Company]
+Copyright (c) 2026 LaunchKit
 
 This license grants the purchaser a non-exclusive, perpetual, worldwide commercial license to use the LaunchKit codebase.
 

@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe/stripe";
+import { getStripe } from "@/lib/stripe/stripe";
 import { PLANS } from "@/lib/stripe/config";
 import { createClient } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
+
+// Note: In production, a distributed Redis-based solution (like Upstash) should be used for rate limiting.
+const rateLimitMap = new Map<string, number>();
+const RATE_LIMIT_WINDOW_MS = 10_000;
 
 export async function POST(req: Request) {
   try {
+    const stripe = getStripe();
+    const supabaseAdmin = getSupabaseAdmin();
     const supabase = await createClient();
     const {
       data: { user },
@@ -14,6 +20,16 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const now = Date.now();
+    const lastRequestTime = rateLimitMap.get(user.id);
+    if (lastRequestTime && now - lastRequestTime < RATE_LIMIT_WINDOW_MS) {
+      return NextResponse.json(
+        { error: "Too Many Requests. Please wait before trying again." },
+        { status: 429 }
+      );
+    }
+    rateLimitMap.set(user.id, now);
 
     let body: { priceId?: unknown };
     try {
@@ -62,10 +78,18 @@ export async function POST(req: Request) {
       });
       customerId = customer.id;
 
-      await supabaseAdmin
+      const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({ stripe_customer_id: customerId })
         .eq("id", user.id);
+
+      if (updateError) {
+        console.error("Failed to link Stripe customer ID to profile:", updateError);
+        return NextResponse.json(
+          { error: "Failed to link customer profile. Please try again." },
+          { status: 500 }
+        );
+      }
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";

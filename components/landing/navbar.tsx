@@ -10,23 +10,30 @@ import { motion } from "framer-motion";
 
 export function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
+    let isMounted = true;
+    const supabase = createClient();
+
     supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+      if (isMounted) {
+        setUser(data.user);
+      }
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user ?? null);
+        if (isMounted) {
+          setUser(session?.user ?? null);
+        }
       }
     );
 
     return () => {
+      isMounted = false;
       authListener.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   return (
     <motion.header
@@ -64,7 +71,7 @@ export function Navbar() {
             [ Pricing ]
           </Link>
           <Link
-            href="#architecture"
+            href="#features"
             className="hover:text-white hover:text-[#FF5A00] transition-colors"
           >
             [ Architecture ]

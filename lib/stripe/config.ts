@@ -56,8 +56,8 @@ export const PLANS: Plan[] = [
     description: "High-volume throughput, custom SLA terms, and multi-tenant scaling.",
     monthlyPrice: 79,
     yearlyPrice: 790,
-    monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || "price_ultra_monthly",
-    yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_YEARLY_PRICE_ID || "price_ultra_yearly",
+    monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_ULTRA_MONTHLY_PRICE_ID || "price_ultra_monthly",
+    yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_ULTRA_YEARLY_PRICE_ID || "price_ultra_yearly",
     popular: false,
     features: [
       "Everything in Pro included",

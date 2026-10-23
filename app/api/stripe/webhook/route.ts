@@ -2,8 +2,8 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
-import { stripe } from "@/lib/stripe/stripe";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getStripe } from "@/lib/stripe/stripe";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 interface SubscriptionPeriodItem {
   current_period_end?: number;
@@ -18,6 +18,9 @@ function getPeriodEndTimestamp(subscription: Stripe.Subscription): string | null
 }
 
 export async function POST(req: Request) {
+  const stripe = getStripe();
+  const supabaseAdmin = getSupabaseAdmin();
+
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
     console.error("STRIPE_WEBHOOK_SECRET environment variable is not configured.");
@@ -55,9 +58,6 @@ export async function POST(req: Request) {
 
         const userId = session.metadata?.userId || session.client_reference_id;
 
-        console.log("Webhook received for User ID:", userId);
-        console.log("Session Metadata:", session.metadata);
-
         if (subscriptionId) {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
           const priceId = subscription.items.data[0]?.price.id;
@@ -79,7 +79,6 @@ export async function POST(req: Request) {
               })
               .select();
 
-            console.log("Upsert Result Data:", data);
             if (error) console.error("Upsert Error:", error);
 
             if (error) {
@@ -103,7 +102,6 @@ export async function POST(req: Request) {
               .eq("stripe_customer_id", customerId)
               .select();
 
-            console.log("Update Result Data (by customerId):", data);
             if (error) console.error("Update Error (by customerId):", error);
 
             if (error) {
@@ -141,6 +139,7 @@ export async function POST(req: Request) {
         const userId = subscription.metadata?.userId;
 
         const subUpdateData = {
+          stripe_customer_id: customerId,
           stripe_subscription_id: subscription.id,
           stripe_price_id: priceId,
           subscription_status: subscription.status,
@@ -221,6 +220,10 @@ export async function POST(req: Request) {
 
         if (!data || data.length === 0) {
           console.error("⚠️ Webhook failed to cancel user subscription. No rows matched.");
+          return NextResponse.json(
+            { error: "Failed to cancel subscription state: no rows matched" },
+            { status: 500 }
+          );
         }
 
         revalidatePath("/dashboard");
@@ -287,6 +290,10 @@ export async function POST(req: Request) {
 
         if (!data || data.length === 0) {
           console.error("⚠️ Webhook failed to update past_due user. No rows matched.");
+          return NextResponse.json(
+            { error: "Failed to record past_due state: no rows matched" },
+            { status: 500 }
+          );
         }
 
         revalidatePath("/dashboard");

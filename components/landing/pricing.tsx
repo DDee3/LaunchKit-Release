@@ -17,14 +17,18 @@ export function Pricing() {
     subscription_status?: string | null;
   } | null>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
+    let isMounted = true;
+    const supabase = createClient();
+
     async function loadUserProfile() {
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser();
+
+        if (!isMounted) return;
 
         if (user) {
           setIsLoggedIn(true);
@@ -34,7 +38,7 @@ export function Pricing() {
             .eq("id", user.id)
             .single();
 
-          if (data) {
+          if (isMounted && data) {
             setProfile(data);
           }
         } else {
@@ -47,7 +51,11 @@ export function Pricing() {
     }
 
     loadUserProfile();
-  }, [supabase]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Determine current active plan identifier for logged-in user
   let currentPlanId: string | null = null;
@@ -86,6 +94,23 @@ export function Pricing() {
     try {
       if (!isLoggedIn) {
         router.push(`/login?redirectTo=/dashboard&priceId=${priceId}`);
+        return;
+      }
+
+      // If the user is already subscribed, redirect to the Stripe Customer Portal
+      // to upgrade, downgrade, or switch intervals without double-billing
+      if (isLoggedIn && currentPlanId && currentPlanId !== "free") {
+        const portalResponse = await fetch("/api/stripe/portal", {
+          method: "POST",
+        });
+
+        const portalData = await portalResponse.json();
+
+        if (portalData.url) {
+          window.location.href = portalData.url;
+        } else {
+          alert(portalData.error || "Failed to open billing portal");
+        }
         return;
       }
 

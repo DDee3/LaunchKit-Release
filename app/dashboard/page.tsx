@@ -53,7 +53,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <span>// TELEMETRY & BILLING CONSOLE</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-[-0.04em] uppercase text-white leading-tight">
-            OPERATOR: {profile?.full_name || user.email?.split("@")[0]}
+            OPERATOR: {profile?.full_name || user.email?.split("@")[0] || "UNKNOWN"}
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 mt-2 font-mono">
             Autonomous API execution, Postgres RLS boundaries, and Stripe subscription lifecycle.

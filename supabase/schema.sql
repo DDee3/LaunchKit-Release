@@ -42,9 +42,11 @@ create policy "Users can update own profile"
   with check (auth.uid() = id);
 
 -- Column-level privilege restrictions:
--- Allow authenticated and service_role to access profiles,
--- while relying on RLS and the protective trigger to guard sensitive fields.
-grant all on public.profiles to authenticated;
+-- Strictly limit authenticated users to SELECT and updating non-sensitive profile columns,
+-- while relying on RLS and the protective trigger as defense-in-depth.
+revoke all on public.profiles from authenticated;
+grant select on public.profiles to authenticated;
+grant update (full_name, avatar_url) on public.profiles to authenticated;
 grant all on public.profiles to service_role;
 grant all on public.profiles to postgres;
 

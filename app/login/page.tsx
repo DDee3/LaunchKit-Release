@@ -28,6 +28,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirectTo");
+  const priceId = searchParams.get("priceId");
   const isSafeRelative =
     typeof rawRedirect === "string" &&
     rawRedirect.startsWith("/") &&
@@ -61,6 +62,18 @@ function LoginForm() {
       }
 
       if (data?.session) {
+        if (priceId) {
+          const checkoutRes = await fetch("/api/stripe/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ priceId }),
+          });
+          const checkoutData = await checkoutRes.json();
+          if (checkoutRes.ok && checkoutData.url) {
+            window.location.href = checkoutData.url;
+            return;
+          }
+        }
         router.push(safeRedirect);
         router.refresh();
       }
