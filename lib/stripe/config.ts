@@ -36,8 +36,8 @@ export const PLANS: Plan[] = [
     description: "Production infrastructure with automated billing workflows and customer self-service.",
     monthlyPrice: 29,
     yearlyPrice: 290,
-    monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly",
-    yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || "price_pro_yearly",
+    monthlyPriceId: (process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly").trim(),
+    yearlyPriceId: (process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || "price_pro_yearly").trim(),
     popular: true,
     features: [
       "Unlimited Production Workspaces",
@@ -56,8 +56,16 @@ export const PLANS: Plan[] = [
     description: "High-volume throughput, custom SLA terms, and multi-tenant scaling.",
     monthlyPrice: 79,
     yearlyPrice: 790,
-    monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_ULTRA_MONTHLY_PRICE_ID || "price_ultra_monthly",
-    yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_ULTRA_YEARLY_PRICE_ID || "price_ultra_yearly",
+    monthlyPriceId: (
+      process.env.NEXT_PUBLIC_STRIPE_ULTRA_MONTHLY_PRICE_ID ||
+      process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID ||
+      "price_ultra_monthly"
+    ).trim(),
+    yearlyPriceId: (
+      process.env.NEXT_PUBLIC_STRIPE_ULTRA_YEARLY_PRICE_ID ||
+      process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_YEARLY_PRICE_ID ||
+      "price_ultra_yearly"
+    ).trim(),
     popular: false,
     features: [
       "Everything in Pro included",

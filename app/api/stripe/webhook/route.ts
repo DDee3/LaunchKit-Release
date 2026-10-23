@@ -127,6 +127,7 @@ export async function POST(req: Request) {
           }
 
           revalidatePath("/dashboard");
+          revalidatePath("/");
         }
         break;
       }
@@ -199,6 +200,7 @@ export async function POST(req: Request) {
         }
 
         revalidatePath("/dashboard");
+        revalidatePath("/");
         break;
       }
 
@@ -240,6 +242,7 @@ export async function POST(req: Request) {
         }
 
         revalidatePath("/dashboard");
+        revalidatePath("/");
         break;
       }
 
@@ -314,6 +317,7 @@ export async function POST(req: Request) {
           }
 
           revalidatePath("/dashboard");
+          revalidatePath("/");
         }
         break;
       }
@@ -347,6 +351,7 @@ export async function POST(req: Request) {
         }
 
         revalidatePath("/dashboard");
+        revalidatePath("/");
         break;
       }
 

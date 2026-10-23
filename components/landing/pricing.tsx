@@ -39,7 +39,18 @@ export function Pricing() {
             .single();
 
           if (isMounted && data) {
+            console.log(
+              "[Pricing Debug] profile.stripe_price_id:",
+              data.stripe_price_id,
+              "| Configured plans:",
+              PLANS.map((plan) => ({
+                id: plan.id,
+                monthlyPriceId: plan.monthlyPriceId,
+                yearlyPriceId: plan.yearlyPriceId,
+              }))
+            );
             setProfile(data);
+            router.refresh();
           }
         } else {
           setIsLoggedIn(false);
@@ -52,10 +63,16 @@ export function Pricing() {
 
     loadUserProfile();
 
+    const handleFocus = () => {
+      loadUserProfile();
+    };
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       isMounted = false;
+      window.removeEventListener("focus", handleFocus);
     };
-  }, []);
+  }, [router]);
 
   // Determine current active plan identifier for logged-in user
   let currentPlanId: string | null = null;
@@ -64,11 +81,12 @@ export function Pricing() {
       profile?.subscription_status === "active" ||
       profile?.subscription_status === "trialing"
     ) {
+      const normalizedProfilePriceId = profile?.stripe_price_id?.trim();
       const activeMatch = PLANS.find(
         (p) =>
           p.monthlyPriceId &&
-          (p.monthlyPriceId === profile?.stripe_price_id ||
-            p.yearlyPriceId === profile?.stripe_price_id)
+          (p.monthlyPriceId.trim() === normalizedProfilePriceId ||
+            p.yearlyPriceId.trim() === normalizedProfilePriceId)
       );
       currentPlanId = activeMatch ? activeMatch.id : "pro";
     } else {

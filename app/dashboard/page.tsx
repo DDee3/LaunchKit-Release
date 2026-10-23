@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PLANS } from "@/lib/stripe/config";
 import { ManageSubscriptionButton } from "@/components/dashboard/manage-subscription-button";
 import { SuccessBanner } from "@/components/dashboard/success-banner";
 import { TiltCard } from "@/components/landing/tilt-card";
@@ -42,6 +43,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     profile?.subscription_status === "trialing";
 
   const subscriptionStatus = profile?.subscription_status || "free";
+
+  const normalizedPriceId = profile?.stripe_price_id?.trim();
+  const matchedPlan = isSubscribed
+    ? PLANS.find(
+        (p) =>
+          p.monthlyPriceId &&
+          (p.monthlyPriceId.trim() === normalizedPriceId ||
+            p.yearlyPriceId.trim() === normalizedPriceId)
+      )
+    : null;
+
+  const activeTierName = isSubscribed
+    ? matchedPlan
+      ? matchedPlan.name.toUpperCase()
+      : "PRO"
+    : "FREE";
+
+  const isUltra = isSubscribed && matchedPlan?.id === "ultra";
 
   return (
     <div className="space-y-10 pb-16">
@@ -87,7 +106,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 CURRENT TIER
               </div>
               <div className="text-4xl sm:text-5xl font-mono font-black text-white tracking-tight uppercase">
-                {isSubscribed ? "PRO" : "FREE"}
+                {activeTierName}
               </div>
             </div>
           </div>
@@ -135,7 +154,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   {isSubscribed ? "12,480" : "420"}
                 </span>
                 <span className="font-mono text-xs text-zinc-500 uppercase">
-                  / {isSubscribed ? "50,000" : "1,000"}
+                  / {isUltra ? "UNLIMITED" : isSubscribed ? "50,000" : "1,000"}
                 </span>
               </div>
             </div>
