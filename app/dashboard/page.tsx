@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/stripe/config";
 import { ManageSubscriptionButton } from "@/components/dashboard/manage-subscription-button";
 import { SuccessBanner } from "@/components/dashboard/success-banner";
+import { CheckoutTrigger } from "@/components/dashboard/checkout-trigger";
 import { TiltCard } from "@/components/landing/tilt-card";
 import {
   Activity,
@@ -64,6 +65,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <div className="space-y-10 pb-16">
+      <CheckoutTrigger />
       {searchParams.success && <SuccessBanner />}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pb-8 border-b border-white/[0.08]">

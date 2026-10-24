@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -8,16 +9,31 @@ import { Loader2 } from "lucide-react";
 export function OAuthButton() {
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const priceId = searchParams.get("priceId");
+  const rawRedirect = searchParams.get("redirectTo");
+  const isSafeRelative =
+    typeof rawRedirect === "string" &&
+    rawRedirect.startsWith("/") &&
+    !rawRedirect.startsWith("//") &&
+    !rawRedirect.includes("\\") &&
+    !rawRedirect.includes("://");
+  const safeRedirect = isSafeRelative ? rawRedirect : "/dashboard";
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
 
+      if (priceId) {
+        sessionStorage.setItem("pending_checkout_price_id", priceId);
+      }
+      sessionStorage.setItem("pending_redirect", safeRedirect);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${appUrl}/api/auth/callback`,
+          redirectTo: `${appUrl}/api/auth/callback?next=${encodeURIComponent(safeRedirect)}`,
         },
       });
 
