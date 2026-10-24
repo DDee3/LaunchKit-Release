@@ -169,7 +169,7 @@ export function GeometricSpatialMesh() {
 
   return (
     <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden opacity-75">
-      <div className="absolute inset-0 bg-radial-vignette [background:radial-gradient(circle_at_center,transparent_0%,#000000_75%)] z-10 pointer-events-none" />
+      <div className="absolute inset-0 [background:radial-gradient(circle_at_center,transparent_0%,#000000_75%)] z-10 pointer-events-none" />
       <canvas
         ref={canvasRef}
         className="w-full h-full max-w-[1200px] max-h-[800px] object-contain"
