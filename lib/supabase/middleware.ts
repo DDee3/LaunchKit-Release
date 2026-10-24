@@ -1,6 +1,13 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function withRefreshedCookies(redirect: NextResponse, source: NextResponse) {
+  source.cookies.getAll().forEach((cookie) => {
+    redirect.cookies.set(cookie);
+  });
+  return redirect;
+}
+
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -52,7 +59,7 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("redirectTo", pathname);
-      return NextResponse.redirect(url);
+      return withRefreshedCookies(NextResponse.redirect(url), supabaseResponse);
     }
   }
 
@@ -60,7 +67,7 @@ export async function updateSession(request: NextRequest) {
   if ((pathname === "/login" || pathname === "/signup") && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    return withRefreshedCookies(NextResponse.redirect(url), supabaseResponse);
   }
 
   return supabaseResponse;
