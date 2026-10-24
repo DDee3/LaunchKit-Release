@@ -152,6 +152,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 MONTHLY REQS
               </div>
               <div className="flex items-baseline gap-2">
+                {/* Note: These are illustrative placeholder values. Connect them to your actual telemetry database or API usage tracker. */}
                 <span className="text-4xl sm:text-5xl font-mono font-black text-white tracking-tight">
                   {isSubscribed ? "12,480" : "420"}
                 </span>
