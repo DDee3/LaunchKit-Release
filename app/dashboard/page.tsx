@@ -62,6 +62,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const isUltra = isSubscribed && matchedPlan?.id === "ultra";
 
+  console.log("DB Price ID:", profile?.stripe_price_id);
+  console.log("Ultra Plan Env ID:", process.env.NEXT_PUBLIC_STRIPE_ULTRA_MONTHLY_PRICE_ID);
+  console.log("PLANS Ultra monthlyPriceId:", PLANS.find((p) => p.id === "ultra")?.monthlyPriceId);
+  console.log("Matched Plan:", matchedPlan);
+
   return (
     <div className="space-y-10 pb-16">
       {searchParams.success && <SuccessBanner />}
