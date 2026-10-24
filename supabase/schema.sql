@@ -125,7 +125,7 @@ begin
   new.updated_at = timezone('utc'::text, now());
   return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql security definer set search_path = public, pg_temp;
 
 drop trigger if exists on_profile_updated on public.profiles;
 create trigger on_profile_updated
