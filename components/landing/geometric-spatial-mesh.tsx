@@ -23,8 +23,6 @@ export function GeometricSpatialMesh() {
     window.addEventListener("resize", onResize);
 
     // 3D Torus parameters
-    const R = Math.min(width, height) * 0.28; // Major radius
-    const r = Math.min(width, height) * 0.12; // Minor radius
     const numMajor = 36;
     const numMinor = 18;
 
@@ -46,6 +44,9 @@ export function GeometricSpatialMesh() {
     window.addEventListener("mousemove", onMouseMove);
 
     const render = () => {
+      const R = Math.min(width, height) * 0.28; // Major radius
+      const r = Math.min(width, height) * 0.12; // Minor radius
+
       rotX += (targetRotX - rotX) * 0.05 + 0.002;
       rotY += (targetRotY - rotY) * 0.05 + 0.003;
       rotZ += 0.001;
