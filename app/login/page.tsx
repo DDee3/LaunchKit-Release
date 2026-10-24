@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { OAuthButton } from "@/components/auth/oauth-button";
 import { AuthFormDivider } from "@/components/auth/auth-form-divider";
-import { Loader2, AlertCircle, ArrowLeft, Terminal } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, Terminal } from "lucide-react";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -104,6 +104,12 @@ function LoginForm() {
             <span>{errorMsg}</span>
           </div>
         )}
+        {searchParams.get("reset") === "success" && (
+          <div className="mb-4 flex items-center gap-2 border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-mono text-emerald-400">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>Password updated successfully. Sign in with your new credentials.</span>
+          </div>
+        )}
 
         <OAuthButton />
         <AuthFormDivider />
@@ -131,7 +137,7 @@ function LoginForm() {
                 Security Key / Password
               </Label>
               <Link
-                href="/login?forgot=true"
+                href="/forgot-password"
                 className="font-mono text-[11px] text-zinc-400 hover:text-[#FF5A00] transition-colors"
               >
                 Reset Key?
