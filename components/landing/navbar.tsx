@@ -60,19 +60,19 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-8 text-xs font-mono uppercase tracking-widest text-zinc-400">
           <Link
             href="#features"
-            className="hover:text-white hover:text-[#FF5A00] transition-colors"
+            className="hover:text-[#FF5A00] transition-colors"
           >
             [ Features ]
           </Link>
           <Link
             href="#pricing"
-            className="hover:text-white hover:text-[#FF5A00] transition-colors"
+            className="hover:text-[#FF5A00] transition-colors"
           >
             [ Pricing ]
           </Link>
           <Link
-            href="#features"
-            className="hover:text-white hover:text-[#FF5A00] transition-colors"
+            href="#architecture"
+            className="hover:text-[#FF5A00] transition-colors"
           >
             [ Architecture ]
           </Link>

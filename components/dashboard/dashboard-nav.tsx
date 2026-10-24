@@ -70,7 +70,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
             </Link>
             <Link
               href="/#pricing"
-              className="hover:text-white hover:text-[#FF5A00] transition-colors"
+              className="hover:text-[#FF5A00] transition-colors"
             >
               [ Plans ]
             </Link>
