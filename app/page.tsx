@@ -6,7 +6,6 @@ import { FAQ } from "@/components/landing/faq";
 import { Footer } from "@/components/landing/footer";
 import { SmoothScroll } from "@/components/landing/smooth-scroll";
 
-export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   return (

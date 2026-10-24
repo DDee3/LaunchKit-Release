@@ -43,11 +43,15 @@ No bloated dependencies. No demo clutter. Pure, hardened architecture ready for 
 
 ```tree
 ├── app/
-│   ├── (auth)/                  # Isolated authentication layout
-│   │   ├── login/page.tsx       # Email/password & Google OAuth sign-in
-│   │   └── signup/page.tsx      # Registration with automated profile trigger
+│   ├── login/page.tsx           # Email/password & Google OAuth sign-in
+│   ├── signup/page.tsx          # Registration with automated profile trigger
+│   ├── forgot-password/page.tsx # Password recovery email request
+│   ├── reset-password/
+│   │   ├── page.tsx             # Password reset session validator
+│   │   └── reset-password-form.tsx # New password submission form
 │   ├── api/
 │   │   ├── auth/callback/       # Supabase OAuth PKCE exchange handler
+│   │   ├── user/delete/         # Account deletion API
 │   │   └── stripe/
 │   │       ├── checkout/        # Stripe Checkout session creator
 │   │       ├── portal/          # Customer Billing Portal session creator
@@ -60,7 +64,7 @@ No bloated dependencies. No demo clutter. Pure, hardened architecture ready for 
 │   └── page.tsx                 # High-converting landing page
 ├── components/
 │   ├── auth/                    # OAuth buttons and form helpers
-│   ├── dashboard/               # Console navigation and billing portal button
+│   ├── dashboard/               # Console navigation, billing portal, and checkout trigger
 │   ├── landing/                 # Floating navbar, hero, features, pricing, FAQ, footer
 │   └── ui/                      # Accessible UI primitives (Radix UI + Tailwind)
 ├── lib/
