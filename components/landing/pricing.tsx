@@ -39,16 +39,6 @@ export function Pricing() {
             .single();
 
           if (isMounted && data) {
-            console.log(
-              "[Pricing Debug] profile.stripe_price_id:",
-              data.stripe_price_id,
-              "| Configured plans:",
-              PLANS.map((plan) => ({
-                id: plan.id,
-                monthlyPriceId: plan.monthlyPriceId,
-                yearlyPriceId: plan.yearlyPriceId,
-              }))
-            );
             setProfile(data);
             router.refresh();
           }
