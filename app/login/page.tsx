@@ -168,7 +168,10 @@ function LoginForm() {
       <CardFooter className="flex justify-center border-t border-white/[0.08] pt-4 font-mono text-xs text-zinc-400">
         <p>
           Unprovisioned operator?{" "}
-          <Link href="/signup" className="text-white hover:text-[#FF5A00] underline font-bold transition-colors">
+          <Link 
+            href={priceId ? `/signup?priceId=${priceId}` : "/signup"} 
+            className="text-white hover:text-[#FF5A00] underline font-bold transition-colors"
+          >
             Register Workspace
           </Link>
         </p>

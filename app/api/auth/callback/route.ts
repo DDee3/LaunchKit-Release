@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const rawNext = searchParams.get("next");
+  const rawNext = searchParams.get("next") || searchParams.get("redirectTo");
 
   // Prevent Open Redirect (CWE-601): Enforce strictly local, non-protocol-relative path
   const isSafeRelativePath =

@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
@@ -30,7 +31,10 @@ export async function POST() {
     }
     rateLimitMap.set(user.id, now);
 
-    // Cancel active Stripe subscription if customer exists
+    // Cancel active Stripe subscription if customer exists.
+    // Already-canceled or missing subscriptions are NOT errors — the user's
+    // intent is to delete the account, and an already-dead subscription is
+    // not a blocker.
     try {
       const { data: profile } = await supabaseAdmin
         .from("profiles")
@@ -42,15 +46,27 @@ export async function POST() {
         await stripe.subscriptions.cancel(profile.stripe_subscription_id);
       }
     } catch (stripeErr: unknown) {
-      const errMsg =
-        stripeErr instanceof Error ? stripeErr.message : "Unknown Stripe error";
-      console.error(
-        `Critical error: Failed to cancel Stripe subscription for user ${user.id}:`,
-        errMsg
-      );
-      return NextResponse.json(
-        { error: "Failed to cancel active subscription prior to account deletion. Please contact support or cancel via the billing portal first." },
-        { status: 500 }
+      const isAlreadyCanceledOrMissing =
+        stripeErr instanceof Stripe.errors.StripeInvalidRequestError &&
+        (stripeErr.code === "resource_missing" ||
+          (stripeErr.message ?? "").toLowerCase().includes("already been canceled") ||
+          (stripeErr.message ?? "").toLowerCase().includes("no such subscription"));
+
+      if (!isAlreadyCanceledOrMissing) {
+        const errMsg =
+          stripeErr instanceof Error ? stripeErr.message : "Unknown Stripe error";
+        console.error(
+          `Critical error: Failed to cancel Stripe subscription for user ${user.id}:`,
+          errMsg
+        );
+        return NextResponse.json(
+          { error: "Failed to cancel active subscription prior to account deletion. Please contact support or cancel via the billing portal first." },
+          { status: 500 }
+        );
+      }
+
+      console.warn(
+        `Subscription for user ${user.id} was already canceled or missing — proceeding with account deletion.`
       );
     }
 

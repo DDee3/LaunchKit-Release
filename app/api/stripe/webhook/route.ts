@@ -73,10 +73,7 @@ export async function POST(req: Request) {
           if (userId) {
             const { data, error } = await supabaseAdmin
               .from("profiles")
-              .upsert({
-                id: userId,
-                ...updateData,
-              })
+              .update(updateData).eq("id", userId)
               .select();
 
             if (error) console.error("Upsert Error:", error);

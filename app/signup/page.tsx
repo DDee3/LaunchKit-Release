@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ import { OAuthButton } from "@/components/auth/oauth-button";
 import { AuthFormDivider } from "@/components/auth/auth-form-divider";
 import { Loader2, AlertCircle, CheckCircle2, ArrowLeft, Terminal } from "lucide-react";
 
-export default function SignUpPage() {
+function SignUpForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +28,8 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const priceId = searchParams.get("priceId");
   const supabase = createClient();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -83,6 +85,18 @@ export default function SignUpPage() {
       }
 
       if (data?.session) {
+        if (priceId) {
+          const checkoutRes = await fetch("/api/stripe/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ priceId }),
+          });
+          const checkoutData = await checkoutRes.json();
+          if (checkoutRes.ok && checkoutData.url) {
+            window.location.href = checkoutData.url;
+            return;
+          }
+        }
         router.push("/dashboard");
         router.refresh();
       } else {
@@ -236,5 +250,13 @@ export default function SignUpPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#000000]" />}>
+      <SignUpForm />
+    </Suspense>
   );
 }
