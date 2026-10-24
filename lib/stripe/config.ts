@@ -11,6 +11,16 @@ export interface Plan {
   cta: string;
 }
 
+const getEnvPriceId = (key: string): string => {
+  const val = process.env[key];
+  if (!val && process.env.NODE_ENV === "development") {
+    console.warn(
+      `[Stripe Config] Warning: ${key} is missing from environment variables. Stripe checkout will not work until this is set.`
+    );
+  }
+  return (val || "").trim();
+};
+
 export const PLANS: Plan[] = [
   {
     id: "free",
@@ -36,8 +46,8 @@ export const PLANS: Plan[] = [
     description: "Production infrastructure with automated billing workflows and customer self-service.",
     monthlyPrice: 29,
     yearlyPrice: 290,
-    monthlyPriceId: (process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly").trim(),
-    yearlyPriceId: (process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || "price_pro_yearly").trim(),
+    monthlyPriceId: getEnvPriceId("NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID"),
+    yearlyPriceId: getEnvPriceId("NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID"),
     popular: true,
     features: [
       "Unlimited Production Workspaces",
@@ -56,16 +66,8 @@ export const PLANS: Plan[] = [
     description: "High-volume throughput, custom SLA terms, and multi-tenant scaling.",
     monthlyPrice: 79,
     yearlyPrice: 790,
-    monthlyPriceId: (
-      process.env.NEXT_PUBLIC_STRIPE_ULTRA_MONTHLY_PRICE_ID ||
-      process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID ||
-      "price_ultra_monthly"
-    ).trim(),
-    yearlyPriceId: (
-      process.env.NEXT_PUBLIC_STRIPE_ULTRA_YEARLY_PRICE_ID ||
-      process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_YEARLY_PRICE_ID ||
-      "price_ultra_yearly"
-    ).trim(),
+    monthlyPriceId: getEnvPriceId("NEXT_PUBLIC_STRIPE_ULTRA_MONTHLY_PRICE_ID") || getEnvPriceId("NEXT_PUBLIC_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID"),
+    yearlyPriceId: getEnvPriceId("NEXT_PUBLIC_STRIPE_ULTRA_YEARLY_PRICE_ID") || getEnvPriceId("NEXT_PUBLIC_STRIPE_ENTERPRISE_YEARLY_PRICE_ID"),
     popular: false,
     features: [
       "Everything in Pro included",
